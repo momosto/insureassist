@@ -1,0 +1,14 @@
+# Runtime (pinned; Dependabot keeps them current)
+anthropic==1.11.0
+fastapi==0.142.2
+uvicorn[standard]==0.54.0
+mcp==1.30.0            # 1.x FastMCP API; 2.x reorganised the server package (upgrade tracked in docs/07)
+httpx==0.28.1
+SQLAlchemy==2.1.1
+psycopg[binary]==3.2.13
+Jinja2==3.1.6
+pydantic-settings==2.15.0
+python-multipart==0.0.32
+PyJWT==2.15.1
+PyYAML==6.0.3
+redis==8.1.0

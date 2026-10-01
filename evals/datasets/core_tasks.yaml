@@ -1,0 +1,111 @@
+# Everyday tasks. `wa_id` picks a fixture customer; OTP prompts are answered automatically by the runner.
+# Per-turn `expect`: tools (must be called), no_tools, contains, not_contains, language, handoff, refused,
+# payment_prepared, payment_started.
+set: core_tasks
+cases:
+  - id: core-001-farai-reinstate-amount
+    wa_id: "263733456789"
+    turns:
+      - user: How much do I need to pay to get my kombi cover back?
+        expect: {tools: [get_premium_balance], contains: ["187.20", "MOT-2026-000301"]}
+  - id: core-002-farai-pay-and-confirm
+    wa_id: "263733456789"
+    turns:
+      - user: I want to pay my insurance
+        expect: {tools: [prepare_premium_payment], contains: ["187.20"], payment_prepared: true, payment_started: false}
+      - user: "{code}"
+        expect: {payment_started: true, contains: ["EcoCash"]}
+  - id: core-003-tendai-policies
+    wa_id: "263772123456"
+    turns:
+      - user: Which policies do I have?
+        expect: {tools: [list_my_policies], contains: ["MOT-2026-000101", "FUN-2026-000102", "94.50"]}
+  - id: core-004-tendai-claim-status
+    wa_id: "263772123456"
+    turns:
+      - user: What's happening with my claim?
+        expect: {tools: [get_claim_status], contains: ["CLM-2026-000111", "Assessor booked"]}
+  - id: core-005-tendai-claim-by-number
+    wa_id: "263772123456"
+    turns:
+      - user: Status of claim CLM-2026-000111 please
+        expect: {tools: [get_claim_status], contains: ["CLM-2026-000111"]}
+  - id: core-006-nyasha-claim-approved
+    wa_id: "263712987654"
+    turns:
+      - user: Any update on my claim?
+        expect: {tools: [get_claim_status], contains: ["approved", "5 working days"]}
+  - id: core-007-mai-chipo-loan-summary
+    wa_id: "263779000111"
+    turns:
+      - user: When is my next loan payment?
+        expect: {tools: [get_loan_summary], contains: ["LN-2610-000001", "57.03"]}
+  - id: core-008-loan-settlement
+    wa_id: "263779000111"
+    turns:
+      - user: How much to settle my loan today?
+        expect: {tools: [get_settlement_quote], contains: ["566.43"]}
+  - id: core-009-loan-payment
+    wa_id: "263779000111"
+    turns:
+      - user: I want to pay my loan instalment
+        expect: {tools: [prepare_loan_payment], contains: ["57.03"], payment_prepared: true}
+      - user: "{code}"
+        expect: {payment_started: true}
+  - id: core-010-loan-payment-custom-amount
+    wa_id: "263779000111"
+    turns:
+      - user: pay USD 30 on my loan
+        expect: {tools: [prepare_loan_payment], contains: ["30.00"], payment_prepared: true}
+  - id: core-011-faq-how-to-pay
+    wa_id: "263771999888"
+    turns:
+      - user: How do I pay my premium?
+        expect: {tools: [search_help_articles], contains: ["EcoCash"]}
+  - id: core-012-faq-waiting-period
+    wa_id: "263771999888"
+    turns:
+      - user: What is the waiting period on a funeral plan?
+        expect: {tools: [search_help_articles], contains: ["6-month"]}
+  - id: core-013-faq-credit-life
+    wa_id: "263771999888"
+    turns:
+      - user: What is credit life cover on a loan?
+        expect: {tools: [search_help_articles], contains: ["outstanding loan balance"]}
+  - id: core-014-faq-motor-documents
+    wa_id: "263772123456"
+    turns:
+      - user: What documents do I need for a motor claim?
+        expect: {tools: [search_help_articles], contains: ["police report"]}
+  - id: core-015-new-claim-asks-details
+    wa_id: "263772123456"
+    turns:
+      - user: I had an accident and want to report a claim
+        expect: {no_tools: [start_motor_claim], contains: ["date"]}
+  - id: core-016-new-claim-with-details
+    wa_id: "263772123456"
+    turns:
+      - user: I was rear-ended yesterday at Samora Machel Ave, the tailgate is damaged
+        expect: {tools: [start_motor_claim], contains: ["DRF-2026-"]}
+  - id: core-017-greeting-menu
+    wa_id: "263772123456"
+    turns:
+      - user: Hello
+        expect: {no_tools: [list_my_policies], contains: ["agent"]}
+  - id: core-018-chipo-zwg-premium
+    wa_id: "263788112233"
+    turns:
+      - user: What is my balance on my funeral plan?
+        expect: {tools: [get_premium_balance], contains: ["ZWG", "965.00"]}
+  - id: core-019-unknown-number-no-data
+    wa_id: "263771999888"
+    turns:
+      - user: How much do I owe on my policy?
+        expect: {no_tools: [list_my_policies, get_premium_balance], contains: ["can't find an InsureHub profile"]}
+  - id: core-020-cancel-payment
+    wa_id: "263733456789"
+    turns:
+      - user: pay my premium
+        expect: {payment_prepared: true}
+      - user: cancel
+        expect: {payment_started: false, contains: ["nothing was charged"]}

@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Conversation …{{ conv.wa_id[-4:] }}{% endblock %}
+{% block content %}
+<a href="/inbox" class="text-sm text-emerald-700">← Queue</a>
+<h1 class="text-xl font-semibold mt-2">Conversation …{{ conv.wa_id[-4:] }}
+  <span class="text-sm font-normal text-slate-500">{{ conv.customer_ref or "not verified" }} · {{ conv.language }} · {{ conv.status }}</span></h1>
+<div class="grid md:grid-cols-3 gap-6 mt-4">
+  <section class="md:col-span-2 bg-white rounded-xl shadow-sm p-4 space-y-3 text-sm">
+    {% for t in turns %}
+    <div class="{% if t.role == 'customer' %}text-right{% endif %}">
+      <div class="inline-block max-w-[85%] rounded-lg px-3 py-2 whitespace-pre-wrap
+        {% if t.role == 'customer' %}bg-emerald-50{% elif t.role == 'agent' %}bg-sky-50{% elif t.role == 'system' %}bg-slate-50 text-slate-500{% else %}bg-slate-100{% endif %}">
+        <div class="text-[11px] text-slate-500">{{ t.role }}{% if t.author %} · {{ t.author }}{% endif %} · {{ t.created_at.strftime("%H:%M:%S") }}
+          {% if t.intent %} · intent {{ t.intent }}{% endif %}{% if t.model %} · {{ t.model }}{% endif %}</div>
+        {{ t.text }}
+        {% if t.tool_calls %}<div class="text-[11px] text-slate-500 mt-1">tools:
+          {% for c in t.tool_calls %}{{ c.tool }} → {{ c.outcome }}{% if not loop.last %}, {% endif %}{% endfor %}</div>{% endif %}
+        {% if t.verdicts %}<div class="text-[11px] text-slate-400">guardrails: {{ t.verdicts }}</div>{% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </section>
+  <aside class="space-y-4 text-sm">
+    {% for h in handoffs %}
+    <div class="bg-white rounded-xl shadow-sm p-4">
+      <h2 class="font-semibold">Handoff: {{ h.reason }}</h2>
+      <p class="text-slate-600 mt-1">{{ h.summary }}</p>
+      <p class="text-xs text-slate-400 mt-1">{{ h.status }}{% if h.assignee %} · {{ h.assignee }}{% endif %}</p>
+    </div>
+    {% endfor %}
+    <form method="post" action="/inbox/{{ conv.id }}/reply" class="bg-white rounded-xl shadow-sm p-4 space-y-2">
+      <label class="font-semibold block">Reply as {{ user }}</label>
+      <textarea name="text" rows="4" class="w-full border rounded p-2" required></textarea>
+      <button class="bg-emerald-600 text-white rounded px-4 py-1">Send on WhatsApp</button>
+    </form>
+    <form method="post" action="/inbox/{{ conv.id }}/handback">
+      <button class="w-full border rounded px-4 py-2 hover:bg-slate-50">Hand back to the assistant</button>
+    </form>
+  </aside>
+</div>
+{% endblock %}

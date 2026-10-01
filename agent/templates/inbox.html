@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}InsureAssist — staff inbox{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-4">
+  <h1 class="text-xl font-semibold">Handoff queue</h1>
+  <span class="text-sm text-slate-500">Signed in as {{ user }} · {{ stats.conversations }} conversations ·
+    {{ stats.handoffs }} handoffs · {{ stats.tool_calls }} audited tool calls</span>
+</div>
+<div class="bg-white rounded-xl shadow-sm divide-y">
+  {% for h, c in queue %}
+  <a href="/inbox/{{ c.id }}" class="block p-4 hover:bg-slate-50">
+    <div class="flex justify-between text-sm">
+      <span class="font-medium">…{{ c.wa_id[-4:] }} · {{ c.customer_ref or "not verified" }}</span>
+      <span class="text-slate-500">{{ h.created_at.strftime("%d %b %H:%M") }} · {{ h.status }}{% if h.assignee %} ({{ h.assignee }}){% endif %}</span>
+    </div>
+    <div class="text-sm mt-1"><span class="inline-block bg-rose-100 text-rose-800 rounded px-2 text-xs">{{ h.reason }}</span>
+      {% if h.sentiment == "negative" %}<span class="inline-block bg-amber-100 text-amber-800 rounded px-2 text-xs">negative</span>{% endif %}
+      <span class="text-slate-600">{{ h.summary }}</span></div>
+  </a>
+  {% else %}
+  <p class="p-6 text-sm text-slate-500">No conversations waiting for a person.</p>
+  {% endfor %}
+</div>
+{% endblock %}

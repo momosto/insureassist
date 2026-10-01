@@ -1,0 +1,13 @@
+[project]
+name = "insureassist"
+version = "0.1.0"
+description = "Scoped WhatsApp customer-service agent for InsureHub Group (fictional): MCP tools, guardrails, evals"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.ruff]
+line-length = 130

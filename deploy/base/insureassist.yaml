@@ -1,0 +1,105 @@
+# Agent (public: WhatsApp webhook + simulator + inbox) and MCP server (cluster-internal only, NetworkPolicy).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: insureassist-agent
+  labels: { app.kubernetes.io/name: insureassist-agent, app.kubernetes.io/part-of: insurehub }
+spec:
+  replicas: 1
+  selector: { matchLabels: { app.kubernetes.io/name: insureassist-agent } }
+  template:
+    metadata: { labels: { app.kubernetes.io/name: insureassist-agent, app.kubernetes.io/part-of: insurehub } }
+    spec:
+      securityContext: { runAsNonRoot: true, runAsUser: 10001, seccompProfile: { type: RuntimeDefault } }
+      containers:
+        - name: agent
+          image: ghcr.io/momosto/insureassist:latest
+          ports: [{ name: http, containerPort: 8100 }]
+          envFrom:
+            - configMapRef: { name: insureassist-config }
+            - secretRef: { name: insureassist-secrets }   # ANTHROPIC_API_KEY, IA_DELEGATED_TOKEN_SECRET, IA_WHATSAPP_*, IA_INBOX_PASSWORD
+          env:
+            - { name: IA_TOOL_TRANSPORT, value: mcp }
+            - { name: IA_MCP_URL, value: http://insureassist-mcp/mcp }
+          resources: { requests: { cpu: 50m, memory: 192Mi }, limits: { memory: 384Mi } }
+          securityContext: { allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: { drop: [ALL] } }
+          volumeMounts: [{ name: tmp, mountPath: /tmp }]
+          readinessProbe: { httpGet: { path: /health/ready, port: http } }
+          livenessProbe: { httpGet: { path: /health/live, port: http }, periodSeconds: 20 }
+      volumes: [{ name: tmp, emptyDir: {} }]
+---
+apiVersion: v1
+kind: Service
+metadata: { name: insureassist-agent }
+spec:
+  selector: { app.kubernetes.io/name: insureassist-agent }
+  ports: [{ name: http, port: 80, targetPort: http }]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: insureassist-mcp
+  labels: { app.kubernetes.io/name: insureassist-mcp, app.kubernetes.io/part-of: insurehub }
+spec:
+  replicas: 1
+  selector: { matchLabels: { app.kubernetes.io/name: insureassist-mcp } }
+  template:
+    metadata: { labels: { app.kubernetes.io/name: insureassist-mcp, app.kubernetes.io/part-of: insurehub } }
+    spec:
+      securityContext: { runAsNonRoot: true, runAsUser: 10001, seccompProfile: { type: RuntimeDefault } }
+      containers:
+        - name: mcp
+          image: ghcr.io/momosto/insureassist:latest
+          command: ["python", "-m", "mcp_server.server"]
+          ports: [{ name: mcp, containerPort: 8101 }]
+          envFrom:
+            - configMapRef: { name: insureassist-config }
+            - secretRef: { name: insureassist-secrets }
+          resources: { requests: { cpu: 25m, memory: 128Mi }, limits: { memory: 256Mi } }
+          securityContext: { allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: { drop: [ALL] } }
+          readinessProbe: { tcpSocket: { port: mcp } }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: insureassist-mcp }
+spec:
+  selector: { app.kubernetes.io/name: insureassist-mcp }
+  ports: [{ name: mcp, port: 80, targetPort: mcp }]
+---
+# Only the agent may call the MCP server (threat model: "MCP server exposure").
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: { name: insureassist-mcp-ingress }
+spec:
+  podSelector: { matchLabels: { app.kubernetes.io/name: insureassist-mcp } }
+  policyTypes: [Ingress]
+  ingress:
+    - from: [{ podSelector: { matchLabels: { app.kubernetes.io/name: insureassist-agent } } }]
+      ports: [{ port: 8101 }]
+---
+apiVersion: v1
+kind: ConfigMap
+metadata: { name: insureassist-config }
+data:
+  IA_LLM_MODE: offline                 # public demo default; "anthropic" with a daily budget for the video/test number
+  IA_MAIN_MODEL: claude-sonnet-5-5
+  IA_SMALL_MODEL: claude-haiku-4-5
+  IA_DAILY_TOKEN_BUDGET: "500000"
+  IA_BACKEND: fixtures                 # "http" once InsureHub's channel endpoints are live
+  IA_LENDHUB_URL: http://lendhub-api.lendhub.svc.cluster.local
+  IA_PAYMENTS_URL: http://payments-api.integrations.svc.cluster.local
+  IA_INSUREHUB_URL: http://insurehub-api.insurehub.svc.cluster.local
+  IA_REDIS_URL: redis://redis.data.svc.cluster.local:6379/2
+  IA_DATABASE_URL: postgresql+psycopg://insureassist@postgres.data.svc.cluster.local:5432/insureassist
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: insureassist
+  annotations: { cert-manager.io/cluster-issuer: letsencrypt }
+spec:
+  ingressClassName: traefik
+  tls: [{ hosts: [assist.example.org], secretName: insureassist-tls }]
+  rules:
+    - host: assist.example.org
+      http: { paths: [{ path: /, pathType: Prefix, backend: { service: { name: insureassist-agent, port: { name: http } } } }] }

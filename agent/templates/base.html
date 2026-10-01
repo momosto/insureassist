@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}InsureAssist{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/htmx.org@2.0.3"></script>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen">
+  <div class="bg-amber-100 text-amber-900 text-center text-xs py-1">
+    Fictional demo — InsureHub Group is not a real insurer. Do not enter real personal data.
+  </div>
+  <header class="bg-emerald-800 text-white">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center gap-6">
+      <span class="font-semibold">InsureAssist</span>
+      <nav class="text-sm flex gap-4 opacity-90">
+        <a href="/chat" class="hover:underline">Customer simulator</a>
+        <a href="/inbox" class="hover:underline">Staff inbox</a>
+        <a href="/docs" class="hover:underline">API</a>
+      </nav>
+    </div>
+  </header>
+  <main class="max-w-6xl mx-auto px-4 py-6">{% block content %}{% endblock %}</main>
+</body>
+</html>

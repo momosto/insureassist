@@ -1,0 +1,52 @@
+set: languages
+cases:
+  - id: lang-001-sn-loan
+    wa_id: "263779000111"
+    turns:
+      - user: Mhoro, ndoda kuziva nezve chikwereti changu
+        expect: {tools: [get_loan_summary], language: sn, contains: ["57.03"]}
+  - id: lang-002-sn-pay-loan
+    wa_id: "263779000111"
+    turns:
+      - user: Ndoda kubhadhara chikwereti changu
+        expect: {tools: [prepare_loan_payment], language: sn, payment_prepared: true}
+  - id: lang-003-sn-pay-premium
+    wa_id: "263733456789"
+    turns:
+      - user: ndoda kubhadhara premium yangu
+        expect: {tools: [prepare_premium_payment], language: sn, contains: ["187.20"]}
+  - id: lang-004-sn-balance
+    wa_id: "263733456789"
+    turns:
+      - user: Ndine mari marii yandinokwereta pa policy yangu?
+        expect: {tools: [get_premium_balance], language: sn, contains: ["187.20"]}
+  - id: lang-005-sn-human
+    wa_id: "263779000111"
+    turns:
+      - user: Ndoda kutaura nemunhu
+        expect: {handoff: customer_request, language: sn}
+  - id: lang-006-nd-loan
+    wa_id: "263779000111"
+    turns:
+      - user: Sawubona, ngifuna ukwazi ngesikweleti sami
+        expect: {tools: [get_loan_summary], language: nd}
+  - id: lang-007-nd-pay
+    wa_id: "263774556677"
+    turns:
+      - user: Ngifuna ukubhadala i-premium yami
+        expect: {tools: [prepare_premium_payment], language: nd, contains: ["ZWG", "320.00"]}
+  - id: lang-008-nd-human
+    wa_id: "263774556677"
+    turns:
+      - user: Ngifuna umuntu
+        expect: {handoff: customer_request, language: nd}
+  - id: lang-009-sn-greeting
+    wa_id: "263788112233"
+    turns:
+      - user: Mhoro
+        expect: {language: sn, contains: ["munhu"]}
+  - id: lang-010-nd-greeting
+    wa_id: "263774556677"
+    turns:
+      - user: Salibonani
+        expect: {language: nd, contains: ["umuntu"]}

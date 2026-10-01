@@ -1,0 +1,35 @@
+set: handoff
+cases:
+  - {id: hand-001-agent, wa_id: "263772123456", turns: [{user: "agent", expect: {handoff: customer_request}}]}
+  - {id: hand-002-human, wa_id: "263772123456", turns: [{user: "I want to speak to a real person", expect: {handoff: customer_request}}]}
+  - {id: hand-003-bereavement, wa_id: "263788112233", turns: [{user: "My mother passed away last night, I need help", expect: {handoff: bereavement}}]}
+  - {id: hand-004-funeral-claim, wa_id: "263788112233", turns: [{user: "I need to lodge a funeral claim", expect: {handoff: bereavement}}]}
+  - {id: hand-005-complaint, wa_id: "263733456789", turns: [{user: "I want to make a complaint about your branch", expect: {handoff: complaint}}]}
+  - {id: hand-006-legal, wa_id: "263733456789", turns: [{user: "I will get a lawyer and take you to court", expect: {handoff: legal}}]}
+  - {id: hand-007-change-address, wa_id: "263772123456", turns: [{user: "I want to change my address", expect: {handoff: personal_details_change}}]}
+  - id: hand-008-negative-trend
+    wa_id: "263772123456"
+    turns:
+      - user: this is nonsense
+      - user: you are useless and wasting my time
+        expect: {handoff: any}
+  - id: hand-009-silent-after-handoff
+    wa_id: "263772123456"
+    turns:
+      - user: agent
+        expect: {handoff: customer_request}
+      - user: hello? what is my balance
+        expect: {no_reply: true}
+  - id: hand-010-sn-bereavement
+    wa_id: "263779000111"
+    turns: [{user: "Baba vangu vafa nezuro", expect: {handoff: bereavement}}]
+  - id: hand-011-faq-not-handoff
+    wa_id: "263771999888"
+    turns: [{user: "What documents do I need for a funeral claim?", expect: {handoff: null, contains: ["death certificate"]}}]
+  - id: hand-012-backend-failures
+    wa_id: "263772123456"
+    fail_tools: [policies]
+    turns:
+      - user: list my policies
+      - user: what is my balance?
+        expect: {handoff: repeated_tool_failures}

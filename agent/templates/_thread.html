@@ -1,0 +1,12 @@
+{% for m in items %}
+  {% if m.who == "customer" %}
+  <div class="flex justify-end"><div class="bg-[#dcf8c6] rounded-lg px-3 py-2 max-w-[75%] whitespace-pre-wrap text-sm shadow-sm">{{ m.text }}</div></div>
+  {% elif m.who == "sms" %}
+  <div class="flex justify-center"><div class="bg-slate-200 text-slate-600 rounded px-3 py-1 text-xs">SMS · {{ m.text }}</div></div>
+  {% else %}
+  <div class="flex justify-start"><div class="bg-white rounded-lg px-3 py-2 max-w-[75%] whitespace-pre-wrap text-sm shadow-sm">{% if m.who == "template" %}<span class="text-xs text-emerald-700 block">Reminder</span>{% endif %}{{ m.text }}</div></div>
+  {% endif %}
+{% else %}
+  <p class="text-center text-sm text-slate-600 mt-10">Say hello to start. Ask about your policy, a payment, a claim or your loan.</p>
+{% endfor %}
+<script>var el = document.getElementById("thread"); if (el) el.scrollTop = el.scrollHeight;</script>

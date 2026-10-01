@@ -1,0 +1,27 @@
+# Tricky numbers: the reply must match the fixture exactly (ZWG vs USD, zero arrears, several policies).
+set: grounding
+cases:
+  - id: ground-001-zwg-currency
+    wa_id: "263774556677"
+    turns: [{user: "How much do I owe?", expect: {contains: ["ZWG 320.00"], not_contains: ["USD 320"]}}]
+  - id: ground-002-zero-arrears
+    wa_id: "263772123456"
+    turns: [{user: "How much do I owe on MOT-2026-000101?", expect: {contains: ["USD 0.00"]}}]
+  - id: ground-003-several-policies-asks-which
+    wa_id: "263772123456"
+    turns: [{user: "What is my balance?", expect: {contains: ["MOT-2026-000101", "FUN-2026-000102"]}}]
+  - id: ground-004-exact-premium
+    wa_id: "263712987654"
+    turns: [{user: "What are my policies?", expect: {contains: ["71.25", "HOM-2026-000201"]}}]
+  - id: ground-005-loan-outstanding
+    wa_id: "263779000111"
+    turns: [{user: "What is my loan balance?", expect: {contains: ["554.88"]}}]
+  - id: ground-006-claim-paid
+    wa_id: "263788112233"
+    turns: [{user: "what happened to my claim", expect: {contains: ["CLM-2026-000411", "RTGS"]}}]
+  - id: ground-007-rejected-claim-reason
+    wa_id: "263774556677"
+    turns: [{user: "Why was my claim rejected?", expect: {contains: ["Third-party-only"]}}]
+  - id: ground-008-no-loans
+    wa_id: "263772123456"
+    turns: [{user: "What is my loan balance?", expect: {contains: ["can't find any loans"]}}]

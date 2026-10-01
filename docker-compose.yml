@@ -1,0 +1,30 @@
+# Agent + MCP server as separate containers (the deployed topology), Redis sessions, PostgreSQL audit store.
+#   docker compose up --build   → simulator http://localhost:8100/chat · staff inbox http://localhost:8100/inbox (any user / Demo123!)
+# Set IA_LLM_MODE=anthropic and ANTHROPIC_API_KEY to use Claude instead of the offline planner.
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment: { POSTGRES_DB: insureassist, POSTGRES_USER: insureassist, POSTGRES_PASSWORD: insureassist }
+    healthcheck: { test: ["CMD-SHELL", "pg_isready -U insureassist"], interval: 5s, retries: 10 }
+  redis:
+    image: redis:7-alpine
+  mcp:
+    build: .
+    command: ["python", "-m", "mcp_server.server"]
+    healthcheck: { test: ["CMD", "python", "-c", "import socket; socket.create_connection(('localhost', 8101), 2)"], interval: 30s }
+    environment: &common
+      IA_DATABASE_URL: postgresql+psycopg://insureassist:insureassist@postgres:5432/insureassist
+      IA_BACKEND: fixtures            # "http" + IA_LENDHUB_URL etc. to use the real core systems
+      IA_DELEGATED_TOKEN_SECRET: compose-only-delegation-secret-change-me
+    depends_on: { postgres: { condition: service_healthy } }
+  agent:
+    build: .
+    ports: ["8100:8100"]
+    environment:
+      <<: *common
+      IA_TOOL_TRANSPORT: mcp
+      IA_MCP_URL: http://mcp:8101/mcp
+      IA_REDIS_URL: redis://redis:6379/0
+      IA_LLM_MODE: ${IA_LLM_MODE:-offline}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+    depends_on: [mcp, redis]

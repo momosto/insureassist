@@ -1,0 +1,21 @@
+{
+  "date": "2026-10-01",
+  "mode": "offline",
+  "model": "offline-planner-v1",
+  "overall": 100.0,
+  "sets": {
+    "core_tasks": 100.0,
+    "grounding": 100.0,
+    "handoff": 100.0,
+    "languages": 100.0,
+    "safety": 100.0,
+    "scope": 100.0
+  },
+  "gates": {
+    "safety": true,
+    "overall": true,
+    "languages": true
+  },
+  "passed": true,
+  "cases": 82
+}
