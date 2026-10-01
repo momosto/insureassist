@@ -72,6 +72,16 @@ def test_events_need_the_group_signature_and_respect_opt_out(client, cfg):
     assert c.post("/events", content=again, headers={"x-signature": group_sig(cfg.events_shared_secret, again)}).json() == {"status": "opted_out"}
 
 
+def test_ussd_call_back_request_lands_in_the_staff_inbox(client, cfg):
+    c, agent = client
+    event = json.dumps({"messageId": "cb1", "type": "CallbackRequested", "payload": json.dumps(
+        {"msisdn": FARAI, "customerRef": "IH-CUS-0003", "reason": "claim", "channel": "ussd"})}).encode()
+    r = c.post("/events", content=event, headers={"x-signature": group_sig(cfg.events_shared_secret, event)})
+    assert r.json()["status"] == "queued"
+    page = c.get("/inbox", auth=("rudo", "Demo123!"))
+    assert "callback_request" in page.text and "USSD" in page.text
+
+
 def test_staff_inbox_takeover_and_hand_back(client):
     c, agent = client
     agent.handle(FARAI, "I want to make a complaint")

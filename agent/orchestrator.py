@@ -497,6 +497,19 @@ class Agent:
             s.add(Turn(conversation_id=conversation_id, role="system", text=f"Handed back to the assistant by {staff}"))
             s.commit()
 
+    def callback_request(self, wa_id: str, reason: str, channel: str, customer_ref: str | None = None) -> str:
+        """A call-back asked for on another channel (USSD *263# option 5) becomes a ticket in this inbox."""
+        with self.sf() as s:
+            conv = Conversation(channel=channel, wa_id=wa_id, customer_ref=customer_ref, status="HANDOFF")
+            s.add(conv)
+            s.flush()
+            s.add(Turn(conversation_id=conv.id, role="system", text=f"Call-back requested on {channel.upper()} about: {reason}"))
+            s.add(Handoff(conversation_id=conv.id, reason="callback_request",
+                          summary=f"Customer {customer_ref or 'unverified'} asked on {channel.upper()} to be called back "
+                                  f"about {reason}. Call …{wa_id[-4:]} within 1 working day.", intent=reason))
+            s.commit()
+            return conv.id
+
     # ================================================================================================ proactive (IA-10)
     def nudge(self, wa_id: str, template: str, text: str) -> bool:
         with self.sf() as s:

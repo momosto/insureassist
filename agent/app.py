@@ -212,11 +212,19 @@ def handle_event(agent: Agent, envelope: dict[str, Any]) -> dict:
         return {"status": "nudged" if sent else "opted_out"}
     if kind in ("LoanArrearsChanged", "loan.arrears-changed"):
         if payload.get("toBucket") == "CURRENT":
-            return {"status": "ignored"}
+            if kind in ("CallbackRequested", "callback.requested"):
+        conversation_id = agent.callback_request(payload["msisdn"], payload.get("reason", "other"),
+                                                 payload.get("channel", "ussd"), payload.get("customerRef"))
+        return {"status": "queued", "conversationId": conversation_id}
+    return {"status": "ignored"}
         sent = agent.nudge(payload["msisdn"], "loan_arrears_reminder",
                            f"InsureHub Microfinance: loan {payload['loanNumber']} is {payload.get('dpd')} days overdue "
                            f"({payload.get('currency', 'USD')} {payload.get('arrearsAmount')}). Reply *pay loan* to pay by "
                            f"EcoCash, or *agent* if you need help.")
         return {"status": "nudged" if sent else "opted_out"}
+    if kind in ("CallbackRequested", "callback.requested"):
+        conversation_id = agent.callback_request(payload["msisdn"], payload.get("reason", "other"),
+                                                 payload.get("channel", "ussd"), payload.get("customerRef"))
+        return {"status": "queued", "conversationId": conversation_id}
     return {"status": "ignored"}
 
