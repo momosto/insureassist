@@ -71,4 +71,5 @@ Without Docker: `python -m venv .venv && pip install -r requirements-dev.txt`, t
 | Test & evaluation | [docs/05-test-and-evaluation-strategy.md](docs/05-test-and-evaluation-strategy.md), [evals/reports/](evals/reports/) |
 | Delivery | [docs/06-delivery-plan.md](docs/06-delivery-plan.md), [CHANGELOG.md](CHANGELOG.md) |
 | Verification | [docs/07-traceability.md](docs/07-traceability.md) |
+| Test cases | [docs/09-test-cases.md](docs/09-test-cases.md): every test and eval case with its requirement and last result |
 | Operations | [docs/08-operations.md](docs/08-operations.md) |
