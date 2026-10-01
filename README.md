@@ -2,7 +2,7 @@
 
 ![CI](https://github.com/momosto/insureassist/actions/workflows/ci.yml/badge.svg)
 
-**Status:** ✅ v0.1.0 built and tested (2026-10-01) · 66 tests · eval gate 82/82 (safety 100%, offline) · live demo: *pending deploy* · **Stack rotation slot:** Python
+**Status:** ✅ v0.1.0 built and tested (2026-10-01) · 67 tests · eval gate 82/82 (safety 100%, offline) · live demo: *pending deploy* · **Stack rotation slot:** Python
 **Stack:** Python 3.11+/3.12 · FastAPI · Anthropic Python SDK (Claude tool use) · **MCP Python SDK (FastMCP, Streamable HTTP)** · SQLAlchemy 2 + PostgreSQL · Redis · HTMX + Tailwind (staff inbox, web-chat simulator) · OpenTelemetry (GenAI conventions) · pytest · custom eval harness · GitHub Actions
 
 **Author:** Simbarashe Nyamusa, Senior Software Engineer

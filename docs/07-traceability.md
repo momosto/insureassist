@@ -1,6 +1,6 @@
 # InsureAssist — requirements traceability & implementation report
 
-**Version:** 0.1.0 · **Date:** 2026-10-01 · **Build:** 66 pytest tests green · offline eval 82/82 (safety 100%) · Compose stack (agent + MCP server + Redis + PostgreSQL) verified end to end
+**Version:** 0.1.0 · **Date:** 2026-10-01 · **Build:** 67 pytest tests green · offline eval 82/82 (safety 100%) · Compose stack (agent + MCP server + Redis + PostgreSQL) verified end to end
 
 ✅ done and tested · 🟡 done with a documented simplification · ⏳ deferred.
 
@@ -16,7 +16,7 @@
 | IA-06 | Loan summary, settlement, pay loan | `get_loan_summary`, `get_settlement_quote`, `prepare_loan_payment`; `HttpBackend` uses LendHub's real channel endpoints | evals `core-007..010`, `lang-001/002` | ✅ |
 | IA-07 | Knowledge-base answers citing the article; "don't know" + handoff | `core/knowledge.py` (BM25 + title boost), 9 fictional articles | evals `core-011..014`, `test_knowledge_search_prefers_the_topical_article` | ✅ |
 | IA-08 | "agent/munhu/umuntu" → human; bot stops replying | `guardrails.HANDOFF_RULES`, conversation status `HANDOFF/HUMAN` | evals `hand-001/002/009`, `lang-005/008` | ✅ |
-| IA-09 | Staff inbox: queue, transcript, summary, intent, sentiment, tool calls; reply; hand back | `/inbox` (HTMX, HTTP Basic), `Agent.staff_reply/hand_back`, summary by Haiku or deterministic | `test_staff_inbox_takeover_and_hand_back` | ✅ (Basic auth until Keycloak) |
+| IA-09 | Staff inbox: queue, transcript, summary, intent, sentiment, tool calls; reply; hand back (also receives USSD call-back requests) | `/inbox` (HTMX, HTTP Basic), `Agent.staff_reply/hand_back`, summary by Haiku or deterministic | `test_staff_inbox_takeover_and_hand_back` | ✅ (Basic auth until Keycloak) |
 | IA-10 | Proactive nudges from `policy.lapsed` / `loan.arrears-changed`, opt-out honoured | `POST /events` (Integrations HMAC scheme), `Agent.nudge`, `OptOut`, STOP keyword | `test_events_need_the_group_signature_and_respect_opt_out` | 🟡 HTTP intake built; direct RabbitMQ consumer not yet (events can be bridged by Notifications) |
 | IA-11 | Audit per turn: input, output, model, prompt version, tool calls (redacted), latency, tokens, verdicts | `Turn` rows, `mcp_tool_audit` (MCP side), redaction | `test_every_call_is_audited_with_redacted_arguments`, `test_transcripts_never_store_codes_or_national_ids` | ✅ (trace ID: see NFR) |
 
